@@ -19,7 +19,12 @@ app.get('/api/health', (req, res) => {
 
 // Routes
 const authRoutes = require('./routes/auth.routes');
+const companyRoutes = require('./routes/company.routes');
+const jobRoutes = require('./routes/job.routes');
+
 app.use('/api/auth', authRoutes);
+app.use('/api/companies', companyRoutes);
+app.use('/api/companies', jobRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
