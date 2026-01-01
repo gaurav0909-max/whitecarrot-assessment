@@ -357,6 +357,228 @@ const jobs = [
     experience_level: 'Senior',
     salary_range: '$250,000 - $350,000 + Equity',
     description: 'We are seeking a CTO to lead our technology strategy, build and manage engineering teams, and drive technical innovation.'
+  },
+
+  // Additional 20 jobs to reach ~50 total
+  {
+    title: 'Cloud Architect',
+    location: 'Dallas, TX',
+    department: 'Engineering',
+    work_policy: 'Hybrid',
+    employment_type: 'Full time',
+    job_type: 'Permanent',
+    experience_level: 'Senior',
+    salary_range: '$145,000 - $185,000',
+    description: 'Design and implement cloud architecture solutions using AWS, Azure, or GCP. Lead cloud migration projects and optimize infrastructure costs.'
+  },
+  {
+    title: 'Product Marketing Manager',
+    location: 'San Diego, CA',
+    department: 'Marketing',
+    work_policy: 'Remote',
+    employment_type: 'Full time',
+    job_type: 'Permanent',
+    experience_level: 'Senior',
+    salary_range: '$110,000 - $140,000',
+    description: 'Drive product launches, create go-to-market strategies, and develop compelling product narratives for our key markets.'
+  },
+  {
+    title: 'Full Stack Developer',
+    location: 'Miami, FL',
+    department: 'Engineering',
+    work_policy: 'Hybrid',
+    employment_type: 'Full time',
+    job_type: 'Permanent',
+    experience_level: 'Mid-level',
+    salary_range: '$95,000 - $125,000',
+    description: 'Build and maintain web applications using React, Node.js, and MongoDB. Work on both frontend and backend development.'
+  },
+  {
+    title: 'IT Support Specialist',
+    location: 'Phoenix, AZ',
+    department: 'IT',
+    work_policy: 'On-site',
+    employment_type: 'Full time',
+    job_type: 'Permanent',
+    experience_level: 'Junior',
+    salary_range: '$50,000 - $65,000',
+    description: 'Provide technical support to employees, manage IT equipment, and troubleshoot hardware and software issues.'
+  },
+  {
+    title: 'Data Scientist',
+    location: 'San Francisco, CA',
+    department: 'Data',
+    work_policy: 'Hybrid',
+    employment_type: 'Full time',
+    job_type: 'Permanent',
+    experience_level: 'Senior',
+    salary_range: '$140,000 - $180,000',
+    description: 'Apply statistical and machine learning techniques to solve complex business problems. Build predictive models and data visualizations.'
+  },
+  {
+    title: 'Scrum Master',
+    location: 'Remote',
+    department: 'Product',
+    work_policy: 'Remote',
+    employment_type: 'Full time',
+    job_type: 'Permanent',
+    experience_level: 'Mid-level',
+    salary_range: '$85,000 - $110,000',
+    description: 'Facilitate Agile ceremonies, remove blockers, and help teams deliver high-quality products on time.'
+  },
+  {
+    title: 'Brand Designer',
+    location: 'Los Angeles, CA',
+    department: 'Design',
+    work_policy: 'Hybrid',
+    employment_type: 'Full time',
+    job_type: 'Permanent',
+    experience_level: 'Mid-level',
+    salary_range: '$75,000 - $100,000',
+    description: 'Create and maintain brand guidelines, design marketing materials, and ensure brand consistency across all channels.'
+  },
+  {
+    title: 'Site Reliability Engineer',
+    location: 'Seattle, WA',
+    department: 'Engineering',
+    work_policy: 'Hybrid',
+    employment_type: 'Full time',
+    job_type: 'Permanent',
+    experience_level: 'Senior',
+    salary_range: '$135,000 - $170,000',
+    description: 'Ensure high availability and performance of our systems. Implement monitoring, alerting, and incident response procedures.'
+  },
+  {
+    title: 'Finance Manager',
+    location: 'New York, NY',
+    department: 'Finance',
+    work_policy: 'Hybrid',
+    employment_type: 'Full time',
+    job_type: 'Permanent',
+    experience_level: 'Senior',
+    salary_range: '$120,000 - $150,000',
+    description: 'Manage financial planning, budgeting, and reporting. Work with leadership to drive financial strategy and decision-making.'
+  },
+  {
+    title: 'Legal Counsel',
+    location: 'Washington, DC',
+    department: 'Legal',
+    work_policy: 'Hybrid',
+    employment_type: 'Full time',
+    job_type: 'Permanent',
+    experience_level: 'Senior',
+    salary_range: '$150,000 - $200,000',
+    description: 'Provide legal advice on contracts, compliance, intellectual property, and corporate matters. Manage relationships with external counsel.'
+  },
+  {
+    title: 'API Developer',
+    location: 'Remote',
+    department: 'Engineering',
+    work_policy: 'Remote',
+    employment_type: 'Full time',
+    job_type: 'Permanent',
+    experience_level: 'Mid-level',
+    salary_range: '$100,000 - $130,000',
+    description: 'Design and implement RESTful and GraphQL APIs. Focus on API performance, security, and developer experience.'
+  },
+  {
+    title: 'Video Editor',
+    location: 'Los Angeles, CA',
+    department: 'Marketing',
+    work_policy: 'Hybrid',
+    employment_type: 'Full time',
+    job_type: 'Permanent',
+    experience_level: 'Mid-level',
+    salary_range: '$65,000 - $85,000',
+    description: 'Create and edit video content for marketing campaigns, social media, and product demos. Proficiency in Adobe Premiere and After Effects required.'
+  },
+  {
+    title: 'Research Scientist',
+    location: 'Boston, MA',
+    department: 'Research',
+    work_policy: 'On-site',
+    employment_type: 'Full time',
+    job_type: 'Permanent',
+    experience_level: 'Senior',
+    salary_range: '$130,000 - $165,000',
+    description: 'Conduct cutting-edge research in AI/ML, publish findings, and collaborate with product teams to implement research into products.'
+  },
+  {
+    title: 'Sales Operations Analyst',
+    location: 'Chicago, IL',
+    department: 'Sales',
+    work_policy: 'Hybrid',
+    employment_type: 'Full time',
+    job_type: 'Permanent',
+    experience_level: 'Mid-level',
+    salary_range: '$70,000 - $90,000',
+    description: 'Optimize sales processes, manage CRM systems, and provide data-driven insights to improve sales performance.'
+  },
+  {
+    title: 'Blockchain Developer',
+    location: 'Remote',
+    department: 'Engineering',
+    work_policy: 'Remote',
+    employment_type: 'Full time',
+    job_type: 'Contract',
+    experience_level: 'Senior',
+    salary_range: '$120 - $180 per hour',
+    description: 'Develop smart contracts and decentralized applications. Experience with Solidity, Ethereum, and Web3 required.'
+  },
+  {
+    title: 'Employee Experience Coordinator',
+    location: 'San Francisco, CA',
+    department: 'Human Resources',
+    work_policy: 'On-site',
+    employment_type: 'Full time',
+    job_type: 'Permanent',
+    experience_level: 'Junior',
+    salary_range: '$55,000 - $70,000',
+    description: 'Plan and execute employee events, manage onboarding programs, and enhance overall employee experience and culture.'
+  },
+  {
+    title: 'Solutions Architect',
+    location: 'Atlanta, GA',
+    department: 'Engineering',
+    work_policy: 'Hybrid',
+    employment_type: 'Full time',
+    job_type: 'Permanent',
+    experience_level: 'Senior',
+    salary_range: '$135,000 - $170,000',
+    description: 'Work with customers and internal teams to design technical solutions. Create architecture diagrams and technical documentation.'
+  },
+  {
+    title: 'Conversion Rate Optimizer',
+    location: 'Remote',
+    department: 'Marketing',
+    work_policy: 'Remote',
+    employment_type: 'Full time',
+    job_type: 'Permanent',
+    experience_level: 'Mid-level',
+    salary_range: '$80,000 - $105,000',
+    description: 'Run A/B tests, analyze user behavior, and implement changes to improve conversion rates across our digital properties.'
+  },
+  {
+    title: 'Partnership Manager',
+    location: 'Austin, TX',
+    department: 'Business Development',
+    work_policy: 'Hybrid',
+    employment_type: 'Full time',
+    job_type: 'Permanent',
+    experience_level: 'Senior',
+    salary_range: '$110,000 - $145,000',
+    description: 'Identify and cultivate strategic partnerships. Negotiate partnership agreements and manage ongoing partner relationships.'
+  },
+  {
+    title: 'Mobile App Tester',
+    location: 'Remote',
+    department: 'QA',
+    work_policy: 'Remote',
+    employment_type: 'Part time',
+    job_type: 'Contract',
+    experience_level: 'Junior',
+    salary_range: '$30 - $45 per hour',
+    description: 'Test mobile applications across various devices and platforms. Document bugs and work with developers to ensure quality releases.'
   }
 ];
 
