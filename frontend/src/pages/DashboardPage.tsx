@@ -1,25 +1,17 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Briefcase, Eye, BarChart3, Plus, Pencil, Trash2, LogOut, ExternalLink } from "lucide-react";
+import { LogOut, ExternalLink, Save, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/AuthContext";
-import { Job } from "@/types";
-import { jobsApi } from "@/services/api";
+import { Company, Job, CompanyTheme } from "@/types";
+import { jobsApi, companyApi } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
-import JobModal from "@/components/JobModal";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { format } from "date-fns";
+import { BrandingTab } from "@/components/editor/BrandingTab";
+import { CompanyTab } from "@/components/editor/CompanyTab";
+import { JobsTab } from "@/components/editor/JobsTab";
+import { LivePreview } from "@/components/editor/LivePreview";
 
 const DashboardPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -29,9 +21,12 @@ const DashboardPage = () => {
 
   const [jobs, setJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingJob, setEditingJob] = useState<Job | null>(null);
-  const [deletingJobId, setDeletingJobId] = useState<number | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Draft state for live preview
+  const [draftCompany, setDraftCompany] = useState<Company | null>(null);
+  const [draftJobs, setDraftJobs] = useState<Job[]>([]);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -40,54 +35,100 @@ const DashboardPage = () => {
   }, [authLoading, isAuthenticated, navigate]);
 
   useEffect(() => {
-    const fetchJobs = async () => {
+    const fetchData = async () => {
       if (!slug) return;
       setIsLoading(true);
       try {
-        const data = await jobsApi.getByCompanySlug(slug);
-        setJobs(data);
+        const [fetchedJobs, fetchedCompany] = await Promise.all([
+          jobsApi.getByCompanySlug(slug),
+          companyApi.getBySlug(slug),
+        ]);
+        setJobs(fetchedJobs);
+        setDraftJobs(fetchedJobs);
+        setDraftCompany(fetchedCompany);
       } catch {
-        toast({ title: "Error", description: "Failed to load jobs", variant: "destructive" });
+        toast({ title: "Error", description: "Failed to load data", variant: "destructive" });
       } finally {
         setIsLoading(false);
       }
     };
     if (isAuthenticated) {
-      fetchJobs();
+      fetchData();
     }
   }, [slug, isAuthenticated, toast]);
 
-  const handleCreateJob = () => {
-    setEditingJob(null);
-    setIsModalOpen(true);
+  const handleThemeChange = (theme: CompanyTheme) => {
+    if (draftCompany) {
+      setDraftCompany({ ...draftCompany, theme });
+      setHasUnsavedChanges(true);
+    }
   };
 
-  const handleEditJob = (job: Job) => {
-    setEditingJob(job);
-    setIsModalOpen(true);
+  const handleCompanyChange = (updates: Partial<Company>) => {
+    if (draftCompany) {
+      setDraftCompany({ ...draftCompany, ...updates });
+      setHasUnsavedChanges(true);
+    }
   };
 
-  const handleDeleteJob = async () => {
-    if (!deletingJobId) return;
+  const handleJobCreate = (job: Job) => {
+    setDraftJobs([job, ...draftJobs]);
+    setJobs([job, ...jobs]);
+  };
+
+  const handleJobUpdate = (updatedJob: Job) => {
+    setDraftJobs(draftJobs.map((j) => (j.id === updatedJob.id ? updatedJob : j)));
+    setJobs(jobs.map((j) => (j.id === updatedJob.id ? updatedJob : j)));
+  };
+
+  const handleJobDelete = async (jobId: number) => {
     try {
-      await jobsApi.delete(deletingJobId);
-      setJobs(jobs.filter((j) => j.id !== deletingJobId));
+      await jobsApi.delete(jobId);
+      setDraftJobs(draftJobs.filter((j) => j.id !== jobId));
+      setJobs(jobs.filter((j) => j.id !== jobId));
       toast({ title: "Job deleted", description: "The job has been removed." });
     } catch {
       toast({ title: "Error", description: "Failed to delete job", variant: "destructive" });
-    } finally {
-      setDeletingJobId(null);
     }
   };
 
-  const handleJobSaved = (savedJob: Job) => {
-    if (editingJob) {
-      setJobs(jobs.map((j) => (j.id === savedJob.id ? savedJob : j)));
-    } else {
-      setJobs([savedJob, ...jobs]);
+  const handleSaveChanges = async () => {
+    if (!slug || !draftCompany) return;
+    setIsSaving(true);
+    try {
+      // Save company info
+      await companyApi.updateInfo(slug, {
+        name: draftCompany.name,
+        description: draftCompany.description,
+      });
+
+      // Save theme
+      if (draftCompany.theme) {
+        await companyApi.updateTheme(slug, draftCompany.theme);
+      }
+
+      setHasUnsavedChanges(false);
+      toast({ title: "Changes saved", description: "Your updates have been published." });
+    } catch {
+      toast({ title: "Error", description: "Failed to save changes", variant: "destructive" });
+    } finally {
+      setIsSaving(false);
     }
-    setIsModalOpen(false);
-    setEditingJob(null);
+  };
+
+  const handleTogglePublish = async () => {
+    if (!slug || !draftCompany) return;
+    const newStatus = !draftCompany.is_published;
+    try {
+      await companyApi.togglePublish(slug, newStatus);
+      setDraftCompany({ ...draftCompany, is_published: newStatus });
+      toast({
+        title: newStatus ? "Careers page published" : "Careers page unpublished",
+        description: newStatus ? "Your careers page is now live!" : "Your careers page is now hidden.",
+      });
+    } catch {
+      toast({ title: "Error", description: "Failed to update publish status", variant: "destructive" });
+    }
   };
 
   const handleLogout = () => {
@@ -95,30 +136,55 @@ const DashboardPage = () => {
     navigate("/login");
   };
 
-  if (authLoading) {
+  if (authLoading || isLoading) {
     return (
       <div className="min-h-screen bg-muted p-8">
         <Skeleton className="h-12 w-64 mb-8" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-32" />
-          ))}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Skeleton className="h-[600px]" />
+          <Skeleton className="h-[600px]" />
         </div>
-        <Skeleton className="h-96" />
       </div>
     );
+  }
+
+  if (!draftCompany) {
+    return <div>Company not found</div>;
   }
 
   return (
     <div className="min-h-screen bg-muted">
       {/* Header */}
-      <header className="bg-card border-b">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <header className="bg-card border-b sticky top-0 z-10">
+        <div className="max-w-[1800px] mx-auto px-4 py-4 flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-foreground">{company?.name || "Company"}</h1>
-            <p className="text-sm text-muted-foreground">Careers Dashboard</p>
+            <p className="text-sm text-muted-foreground">Careers Editor</p>
           </div>
           <div className="flex items-center gap-2">
+            {hasUnsavedChanges && (
+              <Button onClick={handleSaveChanges} disabled={isSaving} size="sm">
+                <Save className="w-4 h-4 mr-2" />
+                {isSaving ? "Saving..." : "Save Changes"}
+              </Button>
+            )}
+            <Button
+              variant={draftCompany.is_published ? "default" : "outline"}
+              size="sm"
+              onClick={handleTogglePublish}
+            >
+              {draftCompany.is_published ? (
+                <>
+                  <Eye className="w-4 h-4 mr-2" />
+                  Published
+                </>
+              ) : (
+                <>
+                  <EyeOff className="w-4 h-4 mr-2" />
+                  Unpublished
+                </>
+              )}
+            </Button>
             <Button variant="outline" size="sm" asChild>
               <a href={`/${slug}/careers`} target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="w-4 h-4 mr-2" />
@@ -133,135 +199,55 @@ const DashboardPage = () => {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Jobs</CardTitle>
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                <Briefcase className="w-4 h-4 text-primary" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold">{jobs.length}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Active Postings</CardTitle>
-              <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                <Eye className="w-4 h-4 text-green-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold">{jobs.length}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Views</CardTitle>
-              <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
-                <BarChart3 className="w-4 h-4 text-purple-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold">{Math.floor(jobs.length * 127)}</p>
-            </CardContent>
-          </Card>
+      {/* Split-Screen Layout */}
+      <main className="max-w-[1800px] mx-auto px-4 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left: Editor Tabs */}
+          <div className="space-y-4">
+            <Tabs defaultValue="branding" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="branding">Branding</TabsTrigger>
+                <TabsTrigger value="company">Company</TabsTrigger>
+                <TabsTrigger value="jobs">Jobs</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="branding" className="mt-4">
+                <BrandingTab
+                  theme={draftCompany.theme || {}}
+                  onThemeChange={handleThemeChange}
+                />
+              </TabsContent>
+
+              <TabsContent value="company" className="mt-4">
+                <CompanyTab
+                  company={draftCompany}
+                  onCompanyChange={handleCompanyChange}
+                />
+              </TabsContent>
+
+              <TabsContent value="jobs" className="mt-4">
+                <JobsTab
+                  jobs={draftJobs}
+                  isLoading={false}
+                  onJobCreate={handleJobCreate}
+                  onJobUpdate={handleJobUpdate}
+                  onJobDelete={handleJobDelete}
+                />
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          {/* Right: Live Preview */}
+          <div className="lg:sticky lg:top-24 h-fit">
+            <div className="mb-2 px-2">
+              <p className="text-sm font-medium text-muted-foreground">Live Preview</p>
+            </div>
+            <div className="h-[800px] overflow-hidden">
+              <LivePreview company={draftCompany} jobs={draftJobs} />
+            </div>
+          </div>
         </div>
-
-        {/* Jobs List */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Job Postings</CardTitle>
-            <Button onClick={handleCreateJob}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add New Job
-            </Button>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="space-y-4">
-                {[1, 2, 3].map((i) => (
-                  <Skeleton key={i} className="h-16" />
-                ))}
-              </div>
-            ) : jobs.length === 0 ? (
-              <div className="text-center py-12">
-                <Briefcase className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">No jobs yet</h3>
-                <p className="text-muted-foreground mb-4">Create your first job posting to get started.</p>
-                <Button onClick={handleCreateJob}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add New Job
-                </Button>
-              </div>
-            ) : (
-              <div className="divide-y">
-                {jobs.map((job) => (
-                  <div key={job.id} className="py-4 flex items-center justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-foreground truncate">{job.title}</h3>
-                      <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                        <span>{job.department}</span>
-                        <span>•</span>
-                        <span>{job.location}</span>
-                        <span>•</span>
-                        <span>{job.job_type}</span>
-                        <span>•</span>
-                        <span>{format(new Date(job.created_at), "MMM d, yyyy")}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => handleEditJob(job)}>
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive hover:text-destructive"
-                        onClick={() => setDeletingJobId(job.id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
       </main>
-
-      {/* Job Modal */}
-      <JobModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setEditingJob(null);
-        }}
-        job={editingJob}
-        onSave={handleJobSaved}
-      />
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deletingJobId} onOpenChange={() => setDeletingJobId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Job</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this job? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteJob} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };

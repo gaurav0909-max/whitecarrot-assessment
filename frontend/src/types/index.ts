@@ -1,9 +1,20 @@
+export interface CompanyTheme {
+  logo_url?: string;
+  banner_url?: string;
+  primary_color?: string;
+  secondary_color?: string;
+}
+
 export interface Company {
   id: number;
   name: string;
   slug: string;
   logo_url?: string;
   description?: string;
+  theme?: CompanyTheme;
+  is_published?: boolean;
+  created_at: string;
+  updated_at?: string;
 }
 
 export interface Job {

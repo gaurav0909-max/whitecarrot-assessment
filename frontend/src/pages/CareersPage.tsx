@@ -104,27 +104,41 @@ const CareersPage = () => {
     );
   }
 
+  const primaryColor = company.theme?.primary_color || "#3B82F6";
+  const secondaryColor = company.theme?.secondary_color || "#10B981";
+
   return (
     <div className="min-h-screen bg-muted">
-      {/* Header */}
-      <header className="bg-card border-b">
-        <div className="max-w-4xl mx-auto px-4 py-8 text-center">
-          {company.logo_url ? (
-            <img
-              src={company.logo_url}
-              alt={`${company.name} logo`}
-              className="w-16 h-16 rounded-full mx-auto mb-4 object-cover"
-            />
-          ) : (
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-              <Building2 className="w-8 h-8 text-primary" />
+      {/* Header with Banner */}
+      <header
+        className="relative h-64 flex items-end border-b"
+        style={{
+          background: company.theme?.banner_url
+            ? `url(${company.theme.banner_url}) center/cover`
+            : `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`,
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="relative w-full max-w-4xl mx-auto px-4 pb-8 text-white">
+          <div className="flex items-center gap-4">
+            {(company.theme?.logo_url || company.logo_url) ? (
+              <img
+                src={company.theme?.logo_url || company.logo_url}
+                alt={`${company.name} logo`}
+                className="w-20 h-20 bg-white rounded-lg p-2 object-contain"
+              />
+            ) : (
+              <div className="w-20 h-20 rounded-lg bg-white/90 flex items-center justify-center">
+                <Building2 className="w-10 h-10 text-gray-700" />
+              </div>
+            )}
+            <div className="text-left">
+              <h1 className="text-4xl font-bold mb-2">{company.name}</h1>
+              {company.description && (
+                <p className="text-white/90 text-lg">{company.description}</p>
+              )}
             </div>
-          )}
-          <h1 className="text-3xl font-bold text-foreground mb-1">{company.name}</h1>
-          <p className="text-lg text-muted-foreground mb-2">Careers</p>
-          {company.description && (
-            <p className="text-muted-foreground max-w-2xl mx-auto">{company.description}</p>
-          )}
+          </div>
         </div>
       </header>
 
@@ -248,7 +262,12 @@ const CareersPage = () => {
                         )}
                       </div>
                     </div>
-                    <Button className="shrink-0">View Details</Button>
+                    <Button
+                      className="shrink-0"
+                      style={{ backgroundColor: primaryColor }}
+                    >
+                      View Details
+                    </Button>
                   </div>
                 </CardContent>
               </Card>

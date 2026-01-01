@@ -1,5 +1,5 @@
 import axios from "axios";
-import { AuthResponse, Company, Job, JobInput, LoginCredentials, RegisterCredentials } from "@/types";
+import { AuthResponse, Company, CompanyTheme, Job, JobInput, LoginCredentials, RegisterCredentials } from "@/types";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
@@ -54,6 +54,21 @@ export const authApi = {
 export const companyApi = {
   getBySlug: async (slug: string): Promise<Company> => {
     const response = await api.get<Company>(`/company/${slug}`);
+    return response.data;
+  },
+
+  updateInfo: async (slug: string, data: { name?: string; description?: string }): Promise<Company> => {
+    const response = await api.put<Company>(`/companies/${slug}`, data);
+    return response.data;
+  },
+
+  updateTheme: async (slug: string, theme: CompanyTheme): Promise<Company> => {
+    const response = await api.put<Company>(`/companies/${slug}/theme`, theme);
+    return response.data;
+  },
+
+  togglePublish: async (slug: string, isPublished: boolean): Promise<Company> => {
+    const response = await api.put<Company>(`/companies/${slug}/publish`, { is_published: isPublished });
     return response.data;
   },
 };
